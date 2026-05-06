@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "rustls-pki-types-kotlin"
+
