@@ -57,10 +57,18 @@ kotlin {
         binaries.framework { baseName = "RustlsPkiTypes"; xcf.add(this) }
     }
     iosSimulatorArm64 {
-        binaries.framework { baseName = "RustlsPkiTypes"; xcf.add(this) }
+        binaries.framework {
+            baseName = "RustlsPkiTypes"
+            isStatic = true
+            xcf.add(this)
+        }
     }
     iosX64 {
-        binaries.framework { baseName = "RustlsPkiTypes"; xcf.add(this) }
+        binaries.framework {
+            baseName = "RustlsPkiTypes"
+            isStatic = true
+            xcf.add(this)
+        }
     }
 
     tvosArm64 {
