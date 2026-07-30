@@ -1,3 +1,5 @@
 package io.github.kotlinmania.rustlspkitypes
 
-actual fun currentTimeMillis(): Long = js("Date.now()")
+import kotlin.time.Clock
+
+actual fun currentTimeMillis(): Long = Clock.System.now().epochSeconds * 1000L

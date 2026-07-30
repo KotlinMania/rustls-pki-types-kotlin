@@ -149,6 +149,15 @@ class ServerNameTest {
                 ),
             ),
             Pair(
+                "FFFF:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+                byteArrayOf(
+                    0xff.toByte(), 0xff.toByte(), 0xff.toByte(), 0xff.toByte(),
+                    0xff.toByte(), 0xff.toByte(), 0xff.toByte(), 0xff.toByte(),
+                    0xff.toByte(), 0xff.toByte(), 0xff.toByte(), 0xff.toByte(),
+                    0xff.toByte(), 0xff.toByte(), 0xff.toByte(), 0xff.toByte(),
+                ),
+            ),
+            Pair(
                 "0:0:0:0:0:0:0:0",
                 byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
             ),
@@ -194,6 +203,10 @@ class ServerNameTest {
             "2a05:d018:076c:b685:e8ab:afd3:af51:3ae:",
             "2a05:d018:076c:b685:e8ab:afd3:af51:3a::",
             "2a05::018:076c:b685:e8ab:afd3:af51:3aed",
+            "2a056:d018:076c:b685:e8ab:afd3:af51:3ae",
+            "2a0:d018:076c:b685:e8ab:afd3:af51:3aed ",
+            "d018:076c:b685:e8ab:afd3:af51:3aed",
+            "2a05:d018:076c:b685:e8ab:afd3:af51:3aed3aed",
         )
 
         for (ip in invalid) {

@@ -174,10 +174,13 @@ private fun validate(input: ByteArray): Boolean {
             }
         }
 
-        // Check label length for Subsequent/NumericOnly/Hyphen states before processing next char
+        // Check label length for Subsequent/NumericOnly/Hyphen states.
+        // In the upstream Rust code, the guard `if len >= MAX_LABEL_LENGTH` runs
+        // before processing the next character, so a 63-char label is valid.
+        // Here the check runs after incrementing len, so we use strict greater-than.
         when (state) {
             DnsValidationState.Subsequent, DnsValidationState.NumericOnly, DnsValidationState.Hyphen -> {
-                if (len >= MAX_LABEL_LENGTH) return false
+                if (len > MAX_LABEL_LENGTH) return false
             }
             else -> {}
         }
@@ -328,7 +331,7 @@ data class Ipv6Addr(val octets: ByteArray) {
                 } else if (i == 0 && bestLen >= 2 && bestStart == 0) {
                     sb.append(":")
                 }
-                sb.append(String.format("%x", groups[i]))
+                sb.append(groups[i].toString(16))
                 i++
             }
         }

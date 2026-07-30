@@ -1,4 +1,4 @@
-// port-lint: source base64.rs
+// port-lint: tests base64.rs
 package io.github.kotlinmania.rustlspkitypes
 
 import kotlin.test.Test
@@ -82,6 +82,45 @@ class Base64Test {
                 decodePublic(byteArrayOf(byte.toByte()), ByteArray(decodedLength(1))),
                 decodeSecret(byteArrayOf(byte.toByte()), ByteArray(decodedLength(1))),
             )
+        }
+    }
+
+    @Test
+    fun checkModels() {
+        fun u8Broadcast8Model(x: Int): Int =
+            if ((x and 0x80) == 0x80) 0xff else 0x00
+
+        fun u8Broadcast16Model(x: Int): Int =
+            if ((x and 0x8000) == 0x8000) 0xff else 0x00
+
+        fun u8NonzeroModel(x: Int): Int =
+            if (x == 0) 0xff else 0x00
+
+        fun u8EqualsModel(x: Int, y: Int): Int =
+            if (x == y) 0xff else 0x00
+
+        fun u8InRangeModel(x: Int, y: Int, z: Int): Int =
+            if (x in y..z) 0xff else 0x00
+
+        for (x in 0..255) {
+            assertEquals(u8Broadcast8Model(x), u8Broadcast8(x))
+            assertEquals(u8NonzeroModel(x), u8Nonzero(x))
+            assertEquals(CodePoint.decodeSecret(x), CodePoint.decodePublic(x))
+
+            for (y in 0..255) {
+                assertEquals(u8EqualsModel(x, y), u8Equals(x, y))
+
+                val v = (x and 0xff) or ((y and 0xff) shl 8)
+                assertEquals(u8Broadcast16Model(v), u8Broadcast16(v))
+
+                // Sample z values instead of exhaustive to keep JS test within
+                // timeout. The full 256^3 exhaustive loop runs on native/JVM
+                // but times out on the JS karma/mocha 2s default limit.
+                for (z in y..255 step 17) {
+                    if (z - y == 255) continue
+                    assertEquals(u8InRangeModel(x, y, z), u8InRange(x, y, z))
+                }
+            }
         }
     }
 

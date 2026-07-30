@@ -102,7 +102,6 @@ sealed class PrivateKeyDer {
             if (keyBytes.size >= 4 &&
                 (keyBytes[0].toInt() and 0xff) == TAG_INTEGER &&
                 (keyBytes[1].toInt() and 0xff) == 0x01 &&
-                (keyBytes[2].toInt() and 0xff) != TAG_SEQUENCE &&
                 (keyBytes[3].toInt() and 0xff) == TAG_SEQUENCE
             ) {
                 return Result.success(Pkcs8(PrivatePkcs8KeyDer.from(key)))
@@ -307,6 +306,14 @@ class CertificateDer(val der: Der) {
         fun from(slice: ByteArray): CertificateDer = CertificateDer(Der(slice))
     }
 }
+
+/**
+ * A DER-encoded SubjectPublicKeyInfo (SPKI), as specified in RFC 5280.
+ *
+ * Public keys are identified in PEM context as a `PUBLIC KEY`.
+ */
+@Deprecated("Prefer SubjectPublicKeyInfoDer instead", ReplaceWith("SubjectPublicKeyInfoDer"))
+typealias SubjectPublicKeyInfo = SubjectPublicKeyInfoDer
 
 /**
  * A DER-encoded SubjectPublicKeyInfo (SPKI), as specified in RFC 5280.
