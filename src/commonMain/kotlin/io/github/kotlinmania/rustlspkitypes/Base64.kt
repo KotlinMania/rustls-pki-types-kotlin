@@ -174,7 +174,7 @@ internal sealed class Error {
     data object InsufficientOutputSpace : Error()
 }
 
-private data class CodePoint(val value: Int) {
+internal data class CodePoint(val value: Int) {
     companion object {
         val WHITESPACE: CodePoint = CodePoint(0xf0)
         val PAD: CodePoint = CodePoint(0xf1)
@@ -225,7 +225,7 @@ private data class CodePoint(val value: Int) {
 }
 
 /** Returns 0xff if [a] is in [lo] through [hi]. */
-private fun u8InRange(a: Int, lo: Int, hi: Int): Int {
+internal fun u8InRange(a: Int, lo: Int, hi: Int): Int {
     check(lo <= hi)
     check(hi - lo != 255)
     val shifted = u8WrappingSub(a, lo)
@@ -233,19 +233,19 @@ private fun u8InRange(a: Int, lo: Int, hi: Int): Int {
 }
 
 /** Returns 0xff if [a] is less than [b], 0 otherwise. */
-private fun u8LessThan(a: Int, b: Int): Int {
+internal fun u8LessThan(a: Int, b: Int): Int {
     val diff = (a - b) and 0xffff
     return u8Broadcast16(diff)
 }
 
 /** Returns 0xff if [a] equals [b], 0 otherwise. */
-private fun u8Equals(a: Int, b: Int): Int {
+internal fun u8Equals(a: Int, b: Int): Int {
     val diff = (a xor b) and 0xff
     return u8Nonzero(diff)
 }
 
 /** Returns 0xff if [x] is zero, 0 otherwise. */
-private fun u8Nonzero(x: Int): Int =
+internal fun u8Nonzero(x: Int): Int =
     u8Broadcast8((x.inv() and u8WrappingSub(x, 1)) and 0xff)
 
 /**
@@ -253,7 +253,7 @@ private fun u8Nonzero(x: Int): Int =
  *
  * In other words, if the top bit of [x] is set, returns 0xff else 0x00.
  */
-private fun u8Broadcast8(x: Int): Int {
+internal fun u8Broadcast8(x: Int): Int {
     val msb = (x and 0xff) ushr 7
     return u8WrappingSub(0, msb)
 }
@@ -263,13 +263,13 @@ private fun u8Broadcast8(x: Int): Int {
  *
  * In other words, if the top bit of [x] is set, returns 0xff else 0x00.
  */
-private fun u8Broadcast16(x: Int): Int {
+internal fun u8Broadcast16(x: Int): Int {
     val msb = (x and 0xffff) ushr 15
     return u8WrappingSub(0, msb)
 }
 
-private fun u8WrappingSub(a: Int, b: Int): Int = (a - b) and 0xff
+internal fun u8WrappingSub(a: Int, b: Int): Int = (a - b) and 0xff
 
-private fun u8WrappingAdd(a: Int, b: Int): Int = (a + b) and 0xff
+internal fun u8WrappingAdd(a: Int, b: Int): Int = (a + b) and 0xff
 
 private const val SHIFT_INITIAL: Int = (8 - 1) * 6

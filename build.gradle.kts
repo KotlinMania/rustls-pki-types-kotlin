@@ -109,6 +109,7 @@ val commonOptIns =
         "kotlin.time.ExperimentalTime",
         "kotlin.concurrent.atomics.ExperimentalAtomicApi",
         "kotlin.ExperimentalUnsignedTypes",
+        "kotlin.experimental.ExperimentalNativeApi",
     )
 
 // ============================================================================
