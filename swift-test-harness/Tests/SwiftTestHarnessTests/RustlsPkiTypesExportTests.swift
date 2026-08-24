@@ -1,7 +1,7 @@
-import XCTest
+import Foundation
 import RustlsPkiTypes
 
-// Smoke test for the Kotlin → Swift Export → SPM → swift test pipeline.
+// Smoke test for the Kotlin → Swift Export → SPM → swift run pipeline.
 //
 // The file's mere existence and successful compilation prove three layers
 // of the pipeline:
@@ -24,12 +24,9 @@ import RustlsPkiTypes
 //      build.gradle.kts produced a module name that's both syntactically
 //      valid as a Swift identifier and reachable from this Package.swift
 //      via the `RustlsPkiTypesLibrary` product.
-//
-// Add more meaningful per-API tests below as the Swift Export surface
-// grows. For now the import + a single passing assertion is the
-// canary that the pipeline is green for this repo.
-final class RustlsPkiTypesExportTests: XCTestCase {
-    func testSwiftModuleLoads() throws {
-        XCTAssertTrue(true, "RustlsPkiTypes swift module imported cleanly")
+@main
+struct RustlsPkiTypesExportTests {
+    static func main() {
+        print("RustlsPkiTypes swift module imported cleanly")
     }
 }

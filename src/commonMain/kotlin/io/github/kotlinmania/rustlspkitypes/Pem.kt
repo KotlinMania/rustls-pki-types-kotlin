@@ -57,24 +57,40 @@ enum class SectionKind(val label: String) {
  */
 sealed class PemError : Throwable() {
     /** A section is missing its "END marker" line. */
-    class MissingSectionEnd(val endMarker: ByteArray) : PemError() {
+    data class MissingSectionEnd(val endMarker: ByteArray) : PemError() {
+        override fun equals(other: Any?): Boolean = other is MissingSectionEnd && endMarker.contentEquals(other.endMarker)
+        override fun hashCode(): Int = endMarker.contentHashCode()
         override fun toString(): String = "missing section end marker: ${endMarker.decodeToString()}"
+        override val message: String get() = toString()
     }
 
     /** Syntax error found in the line that starts a new section. */
-    class IllegalSectionStart(val line: ByteArray) : PemError() {
+    data class IllegalSectionStart(val line: ByteArray) : PemError() {
+        override fun equals(other: Any?): Boolean = other is IllegalSectionStart && line.contentEquals(other.line)
+        override fun hashCode(): Int = line.contentHashCode()
         override fun toString(): String = "illegal section start: ${line.decodeToString()}"
+        override val message: String get() = toString()
     }
 
     /** Base64 decode error. */
-    class Base64Decode(val base64Message: String) : PemError() {
+    data class Base64Decode(val base64Message: String) : PemError() {
         override fun toString(): String = "base64 decode error: $base64Message"
+        override val message: String get() = toString()
     }
 
     /** No items found of desired type. */
     object NoItemsFound : PemError() {
         override fun toString(): String = "no items found"
+        override val message: String get() = toString()
     }
+}
+
+/**
+ * Filter trait for types that can be created from a specific PEM section.
+ */
+interface PemObjectFilter<T : Any> : PemObject {
+    val kind: SectionKind
+    fun from(der: ByteArray): T
 }
 
 /**
@@ -88,6 +104,20 @@ interface PemObject {
      * converts `der` into this type.
      */
     fun fromPem(kind: SectionKind, der: ByteArray): Any?
+
+    companion object {
+        fun <T : Any> fromPemSlice(pem: ByteArray, fromPem: (SectionKind, ByteArray) -> T?): Result<T> {
+            val iter = SliceIter(pem, fromPem)
+            return if (iter.hasNext()) {
+                iter.next()
+            } else {
+                Result.failure(PemError.NoItemsFound)
+            }
+        }
+
+        fun <T : Any> pemSliceIter(pem: ByteArray, fromPem: (SectionKind, ByteArray) -> T?): SliceIter<T> =
+            SliceIter(pem, fromPem)
+    }
 }
 
 private fun byteArrayStartsWith(arr: ByteArray, prefix: ByteArray): Boolean {
@@ -108,14 +138,18 @@ private fun byteArrayConcat(a: ByteArray, b: ByteArray): ByteArray {
 /**
  * Iterator over all PEM sections in a byte slice.
  */
-class PemSliceIter private constructor(
+class SliceIter<T : Any>(
     private var current: ByteArray,
-    private var offset: Int,
-) {
+    private val fromPem: (SectionKind, ByteArray) -> T?,
+) : Iterator<Result<T>> {
+    private var offset: Int = 0
     private var b64Buf: ByteArray = ByteArray(0)
+    private var nextItem: Result<T>? = null
+    private var reachedEnd: Boolean = false
 
     companion object {
-        fun new(input: ByteArray): PemSliceIter = PemSliceIter(input, 0)
+        fun <T : Any> new(input: ByteArray, fromPem: (SectionKind, ByteArray) -> T?): SliceIter<T> =
+            SliceIter(input, fromPem)
     }
 
     /**
@@ -150,13 +184,11 @@ class PemSliceIter private constructor(
 
     private fun readNextLine(): ByteArray? {
         if (offset >= current.size) return null
-        // Find next newline or CR
         var i = offset
         while (i < current.size && current[i] != '\n'.code.toByte() && current[i] != '\r'.code.toByte()) {
             i++
         }
         val line = current.copyOfRange(offset, i)
-        // Skip the delimiter
         if (i < current.size) {
             offset = i + 1
         } else {
@@ -169,7 +201,40 @@ class PemSliceIter private constructor(
      * Returns the rest of the unparsed data.
      */
     fun remainder(): ByteArray = current.copyOfRange(offset, current.size)
+
+    override fun hasNext(): Boolean {
+        if (nextItem != null) return true
+        if (reachedEnd) return false
+        while (true) {
+            val sectionResult = readSection()
+            if (sectionResult.isFailure) {
+                nextItem = Result.failure(sectionResult.exceptionOrNull()!!)
+                reachedEnd = true
+                return true
+            }
+            val pair = sectionResult.getOrThrow()
+            if (pair == null) {
+                reachedEnd = true
+                return false
+            }
+            val (kind, der) = pair
+            val converted = fromPem(kind, der)
+            if (converted != null) {
+                nextItem = Result.success(converted)
+                return true
+            }
+        }
+    }
+
+    override fun next(): Result<T> {
+        if (!hasNext()) throw NoSuchElementException()
+        val item = nextItem!!
+        nextItem = null
+        return item
+    }
 }
+
+typealias PemSliceIter = SliceIter<Pair<SectionKind, ByteArray>>
 
 private sealed class PemFlow {
     data class Continue(val section: SectionLabel?, val b64buf: ByteArray) : PemFlow()

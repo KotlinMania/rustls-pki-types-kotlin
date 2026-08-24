@@ -64,6 +64,11 @@ class ServerNameTest {
     }
 
     @Test
+    fun errorIsDisplay() {
+        assertEquals("invalid dns name", InvalidDnsNameError.message)
+    }
+
+    @Test
     fun dnsNameIsDebug() {
         val example = DnsName.tryFromString("example.com").getOrThrow()
         assertEquals("DnsName(\"example.com\")", example.toString())
@@ -232,6 +237,23 @@ class ServerNameTest {
         assertIs<IpAddr.V6>(v6Result.getOrThrow())
 
         // A hostname is not an IP address
+        val hostResult = IpAddr.tryFrom("example.com")
+        assertTrue(hostResult.isFailure)
+    }
+
+    @Test
+    fun tryFromAsciiStrIpAddressTest() {
+        val v4Result = IpAddr.tryFrom("127.0.0.1")
+        assertTrue(v4Result.isSuccess)
+        assertIs<IpAddr.V4>(v4Result.getOrThrow())
+
+        val invalidResult = IpAddr.tryFrom("127.0.0.")
+        assertTrue(invalidResult.isFailure)
+
+        val v6Result = IpAddr.tryFrom("0000:0000:0000:0000:0000:0000:0000:0001")
+        assertTrue(v6Result.isSuccess)
+        assertIs<IpAddr.V6>(v6Result.getOrThrow())
+
         val hostResult = IpAddr.tryFrom("example.com")
         assertTrue(hostResult.isFailure)
     }
