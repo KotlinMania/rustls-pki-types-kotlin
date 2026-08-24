@@ -124,6 +124,8 @@ class Base64Test {
         }
     }
 
+    // Constant-time validation test requiring valgrind/crabgrind is not portable to Kotlin Multiplatform
+
     private fun decode(input: String): ByteArray {
         val bytes = input.encodeToByteArray()
         val output = ByteArray(decodedLength(bytes.size))

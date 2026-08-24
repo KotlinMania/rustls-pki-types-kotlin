@@ -4,9 +4,7 @@ package io.github.kotlinmania.rustlspkitypes
 /**
  * DER-encoded data.
  *
- * This wrapper type is used to represent DER-encoded data. Since Kotlin
- * does not have Rust's lifetime/borrow semantics, this is an owned
- * [ByteArray] wrapper.
+ * This wrapper type is used to represent DER-encoded data as a [ByteArray] wrapper.
  */
 class Der(
     bytes: ByteArray,

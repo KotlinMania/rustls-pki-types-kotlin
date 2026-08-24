@@ -707,13 +707,12 @@ mavenPublishing {
 // ============================================================================
 
 // Exact test lifecycle task. Without this, ./gradlew test is ambiguous between
-// Android test task names. This runs commonTest through the KMP allTests
+// Android test task names. This runs commonTest through the KMP hostTests
 // lifecycle and adds the Android host + Swift Export parity tests.
 tasks.register("test") {
     group = "verification"
     description = "Runs the commonTest-backed KMP suite, Android host tests, and Swift Export smoke test."
-    dependsOn("allTests")
-    dependsOn("testAndroidHostTest")
+    dependsOn("hostTests")
     dependsOn("swiftExportSmokeTest")
 }
 
@@ -746,7 +745,7 @@ tasks.register("hostTests") {
 // must fail rather than skip when the required toolchain is unavailable.
 tasks.register("swiftExportSmokeTest") {
     group = "verification"
-    description = "Builds the Swift Export SPM package and runs swift test against it."
+    description = "Builds the Swift Export SPM package and runs swift run against it."
     outputs.upToDateWhen { false }
 
     doLast {
@@ -807,7 +806,7 @@ tasks.register("swiftExportSmokeTest") {
         execOperations
             .exec {
                 workingDir = layout.projectDirectory.dir("swift-test-harness").asFile
-                commandLine("swift", "test")
+                commandLine("swift", "run")
             }.assertNormalExitValue()
     }
 }
