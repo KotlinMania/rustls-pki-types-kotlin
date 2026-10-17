@@ -4,7 +4,9 @@ package io.github.kotlinmania.rustlspkitypes
 /**
  * A single recognised section in a PEM file.
  */
-enum class SectionKind(val label: String) {
+enum class SectionKind(
+    val label: String,
+) {
     /** A DER-encoded x509 certificate. Appears as "CERTIFICATE" in PEM files. */
     Certificate("CERTIFICATE"),
 
@@ -57,30 +59,44 @@ enum class SectionKind(val label: String) {
  */
 sealed class PemError : Throwable() {
     /** A section is missing its "END marker" line. */
-    data class MissingSectionEnd(val endMarker: ByteArray) : PemError() {
+    data class MissingSectionEnd(
+        val endMarker: ByteArray,
+    ) : PemError() {
         override fun equals(other: Any?): Boolean = other is MissingSectionEnd && endMarker.contentEquals(other.endMarker)
+
         override fun hashCode(): Int = endMarker.contentHashCode()
+
         override fun toString(): String = "missing section end marker: ${endMarker.decodeToString()}"
+
         override val message: String get() = toString()
     }
 
     /** Syntax error found in the line that starts a new section. */
-    data class IllegalSectionStart(val line: ByteArray) : PemError() {
+    data class IllegalSectionStart(
+        val line: ByteArray,
+    ) : PemError() {
         override fun equals(other: Any?): Boolean = other is IllegalSectionStart && line.contentEquals(other.line)
+
         override fun hashCode(): Int = line.contentHashCode()
+
         override fun toString(): String = "illegal section start: ${line.decodeToString()}"
+
         override val message: String get() = toString()
     }
 
     /** Base64 decode error. */
-    data class Base64Decode(val base64Message: String) : PemError() {
+    data class Base64Decode(
+        val base64Message: String,
+    ) : PemError() {
         override fun toString(): String = "base64 decode error: $base64Message"
+
         override val message: String get() = toString()
     }
 
     /** No items found of desired type. */
     object NoItemsFound : PemError() {
         override fun toString(): String = "no items found"
+
         override val message: String get() = toString()
     }
 }
@@ -90,6 +106,7 @@ sealed class PemError : Throwable() {
  */
 interface PemObjectFilter<T : Any> : PemObject {
     val kind: SectionKind
+
     fun from(der: ByteArray): T
 }
 
@@ -175,6 +192,7 @@ class SliceIter<T : Any>(
                     b64Buf = flow.b64buf
                     continue
                 }
+
                 is PemFlow.Break -> {
                     return Result.success(flow.item)
                 }
@@ -237,13 +255,24 @@ class SliceIter<T : Any>(
 typealias PemSliceIter = SliceIter<Pair<SectionKind, ByteArray>>
 
 private sealed class PemFlow {
-    data class Continue(val section: SectionLabel?, val b64buf: ByteArray) : PemFlow()
-    data class Break(val item: Pair<SectionKind, ByteArray>?) : PemFlow()
+    data class Continue(
+        val section: SectionLabel?,
+        val b64buf: ByteArray,
+    ) : PemFlow()
+
+    data class Break(
+        val item: Pair<SectionKind, ByteArray>?,
+    ) : PemFlow()
 }
 
 private sealed class SectionLabel {
-    data class Known(val kind: SectionKind) : SectionLabel()
-    data class Unknown(val ty: ByteArray) : SectionLabel()
+    data class Known(
+        val kind: SectionKind,
+    ) : SectionLabel()
+
+    data class Unknown(
+        val ty: ByteArray,
+    ) : SectionLabel()
 
     fun asSlice(): ByteArray =
         when (this) {
@@ -296,8 +325,14 @@ private fun pemRead(
                     trailer++
                     pos = i
                 }
-                '\n'.code.toByte(), '\r'.code.toByte(), ' '.code.toByte() -> continue
-                else -> break
+
+                '\n'.code.toByte(), '\r'.code.toByte(), ' '.code.toByte() -> {
+                    continue
+                }
+
+                else -> {
+                    break
+                }
             }
         }
 
@@ -310,18 +345,23 @@ private fun pemRead(
     }
 
     if (section != null && section.isEndCheck(line)) {
-        val kind = when (section) {
-            is SectionLabel.Known -> section.kind
-            is SectionLabel.Unknown -> {
-                return Result.success(PemFlow.Continue(null, ByteArray(0)))
+        val kind =
+            when (section) {
+                is SectionLabel.Known -> {
+                    section.kind
+                }
+
+                is SectionLabel.Unknown -> {
+                    return Result.success(PemFlow.Continue(null, ByteArray(0)))
+                }
             }
-        }
 
         var der = ByteArray(decodedLength(b64buf.size))
-        val derLen = when (kind.secret()) {
-            true -> decodeSecret(b64buf, der)
-            false -> decodePublic(b64buf, der)
-        }
+        val derLen =
+            when (kind.secret()) {
+                true -> decodeSecret(b64buf, der)
+                false -> decodePublic(b64buf, der)
+            }
 
         if (derLen is Base64DecodeResult.Err) {
             return Result.failure(PemError.Base64Decode(derLen.toString()))
@@ -333,11 +373,12 @@ private fun pemRead(
         return Result.success(PemFlow.Break(Pair(kind, der)))
     }
 
-    val newB64 = if (section != null) {
-        byteArrayConcat(b64buf, line)
-    } else {
-        b64buf
-    }
+    val newB64 =
+        if (section != null) {
+            byteArrayConcat(b64buf, line)
+        } else {
+            b64buf
+        }
 
     return Result.success(PemFlow.Continue(section, newB64))
 }

@@ -10,10 +10,14 @@ package io.github.kotlinmania.rustlspkitypes
  */
 sealed class ServerName {
     /** The server is identified by a DNS name. The name is sent in the TLS Server Name Indication (SNI) extension. */
-    data class DnsNameValue(val dnsName: DnsName) : ServerName()
+    data class DnsNameValue(
+        val dnsName: DnsName,
+    ) : ServerName()
 
     /** The server is identified by an IP address. SNI is not done. */
-    data class IpAddressValue(val ipAddress: IpAddr) : ServerName()
+    data class IpAddressValue(
+        val ipAddress: IpAddr,
+    ) : ServerName()
 
     /**
      * Produce an owned [ServerName] from this [ServerName].
@@ -62,7 +66,9 @@ sealed class ServerName {
 /**
  * A type which encapsulates a string that is a syntactically valid DNS name.
  */
-class DnsName private constructor(val value: String) {
+class DnsName private constructor(
+    val value: String,
+) {
     /**
      * Produce an owned [DnsName] from this [DnsName].
      */
@@ -122,7 +128,10 @@ private enum class DnsValidationState {
     Hyphen,
 }
 
-private data class DnsValidationContext(val state: DnsValidationState, val len: Int)
+private data class DnsValidationContext(
+    val state: DnsValidationState,
+    val len: Int,
+)
 
 private const val MAX_LABEL_LENGTH: Int = 63
 private const val MAX_NAME_LENGTH: Int = 253
@@ -138,41 +147,100 @@ private fun validate(input: ByteArray): Boolean {
     var idx = 0
     while (idx < input.size) {
         val ch = input[idx].toInt() and 0xff
-        state = when (state) {
-            DnsValidationState.Start, DnsValidationState.Next, DnsValidationState.NextAfterNumericOnly -> {
-                when (ch) {
-                    '.'.code -> return false
-                    in '0'.code..'9'.code -> { len = 1; DnsValidationState.NumericOnly }
-                    in 'a'.code..'z'.code, in 'A'.code..'Z'.code, '_'.code -> { len = 1; DnsValidationState.Subsequent }
-                    else -> return false
+        state =
+            when (state) {
+                DnsValidationState.Start, DnsValidationState.Next, DnsValidationState.NextAfterNumericOnly -> {
+                    when (ch) {
+                        '.'.code -> {
+                            return false
+                        }
+
+                        in '0'.code..'9'.code -> {
+                            len = 1
+                            DnsValidationState.NumericOnly
+                        }
+
+                        in 'a'.code..'z'.code, in 'A'.code..'Z'.code, '_'.code -> {
+                            len = 1
+                            DnsValidationState.Subsequent
+                        }
+
+                        else -> {
+                            return false
+                        }
+                    }
+                }
+
+                DnsValidationState.Subsequent -> {
+                    when (ch) {
+                        '.'.code -> {
+                            DnsValidationState.Next
+                        }
+
+                        '-'.code -> {
+                            len += 1
+                            DnsValidationState.Hyphen
+                        }
+
+                        in 'a'.code..'z'.code, in 'A'.code..'Z'.code, '_'.code, in '0'.code..'9'.code -> {
+                            len += 1
+                            DnsValidationState.Subsequent
+                        }
+
+                        else -> {
+                            return false
+                        }
+                    }
+                }
+
+                DnsValidationState.NumericOnly -> {
+                    when (ch) {
+                        '.'.code -> {
+                            DnsValidationState.NextAfterNumericOnly
+                        }
+
+                        '-'.code -> {
+                            len += 1
+                            DnsValidationState.Hyphen
+                        }
+
+                        in 'a'.code..'z'.code, in 'A'.code..'Z'.code, '_'.code, in '0'.code..'9'.code -> {
+                            len += 1
+                            DnsValidationState.Subsequent
+                        }
+
+                        else -> {
+                            return false
+                        }
+                    }
+                }
+
+                DnsValidationState.Hyphen -> {
+                    when {
+                        ch == '.'.code -> {
+                            return false
+                        }
+
+                        len >= MAX_LABEL_LENGTH -> {
+                            return false
+                        }
+
+                        '-'.code == ch -> {
+                            len += 1
+                            DnsValidationState.Hyphen
+                        }
+
+                        (ch in 'a'.code..'z'.code || ch in 'A'.code..'Z'.code || ch == '_'.code || ch in '0'.code..'9'.code) -> {
+                            len += 1
+                            DnsValidationState.Subsequent
+                        }
+
+                        else -> {
+                            return false
+                        }
+                    }
                 }
             }
-            DnsValidationState.Subsequent -> {
-                when (ch) {
-                    '.'.code -> DnsValidationState.Next
-                    '-'.code -> { len += 1; DnsValidationState.Hyphen }
-                    in 'a'.code..'z'.code, in 'A'.code..'Z'.code, '_'.code, in '0'.code..'9'.code -> { len += 1; DnsValidationState.Subsequent }
-                    else -> return false
-                }
-            }
-            DnsValidationState.NumericOnly -> {
-                when (ch) {
-                    '.'.code -> DnsValidationState.NextAfterNumericOnly
-                    '-'.code -> { len += 1; DnsValidationState.Hyphen }
-                    in 'a'.code..'z'.code, in 'A'.code..'Z'.code, '_'.code, in '0'.code..'9'.code -> { len += 1; DnsValidationState.Subsequent }
-                    else -> return false
-                }
-            }
-            DnsValidationState.Hyphen -> {
-                when {
-                    ch == '.'.code -> return false
-                    len >= MAX_LABEL_LENGTH -> return false
-                    '-'.code == ch -> { len += 1; DnsValidationState.Hyphen }
-                    (ch in 'a'.code..'z'.code || ch in 'A'.code..'Z'.code || ch == '_'.code || ch in '0'.code..'9'.code) -> { len += 1; DnsValidationState.Subsequent }
-                    else -> return false
-                }
-            }
-        }
 
         // Check label length for Subsequent/NumericOnly/Hyphen states.
         // In the upstream Rust code, the guard `if len >= MAX_LABEL_LENGTH` runs
@@ -182,6 +250,7 @@ private fun validate(input: ByteArray): Boolean {
             DnsValidationState.Subsequent, DnsValidationState.NumericOnly, DnsValidationState.Hyphen -> {
                 if (len > MAX_LABEL_LENGTH) return false
             }
+
             else -> {}
         }
 
@@ -190,7 +259,9 @@ private fun validate(input: ByteArray): Boolean {
 
     return when (state) {
         DnsValidationState.Start, DnsValidationState.Hyphen,
-        DnsValidationState.NumericOnly, DnsValidationState.NextAfterNumericOnly -> false
+        DnsValidationState.NumericOnly, DnsValidationState.NextAfterNumericOnly,
+        -> false
+
         else -> true
     }
 }
@@ -202,16 +273,24 @@ private fun validate(input: ByteArray): Boolean {
  */
 sealed class IpAddr {
     /** An IPv4 address. */
-    class V4(val addr: Ipv4Addr) : IpAddr() {
+    class V4(
+        val addr: Ipv4Addr,
+    ) : IpAddr() {
         override fun equals(other: Any?): Boolean = other is V4 && addr == other.addr
+
         override fun hashCode(): Int = addr.hashCode()
+
         override fun toString(): String = addr.toString()
     }
 
     /** An IPv6 address. */
-    class V6(val addr: Ipv6Addr) : IpAddr() {
+    class V6(
+        val addr: Ipv6Addr,
+    ) : IpAddr() {
         override fun equals(other: Any?): Boolean = other is V6 && addr == other.addr
+
         override fun hashCode(): Int = addr.hashCode()
+
         override fun toString(): String = addr.toString()
     }
 
@@ -239,7 +318,9 @@ sealed class IpAddr {
 /**
  * An IPv4 address.
  */
-data class Ipv4Addr(val octets: ByteArray) {
+data class Ipv4Addr(
+    val octets: ByteArray,
+) {
     init {
         require(octets.size == 4) { "IPv4 address must have 4 octets" }
     }
@@ -265,7 +346,9 @@ data class Ipv4Addr(val octets: ByteArray) {
 /**
  * An IPv6 address.
  */
-data class Ipv6Addr(val octets: ByteArray) {
+data class Ipv6Addr(
+    val octets: ByteArray,
+) {
     init {
         require(octets.size == 16) { "IPv6 address must have 16 octets" }
     }
@@ -348,16 +431,20 @@ enum class AddrKind { Ipv4, Ipv6 }
 /**
  * Failure to parse an IP address.
  */
-data class AddrParseError(val kind: AddrKind) : Throwable(
-    when (kind) {
-        AddrKind.Ipv4 -> "invalid IPv4 address syntax"
-        AddrKind.Ipv6 -> "invalid IPv6 address syntax"
-    },
-)
+data class AddrParseError(
+    val kind: AddrKind,
+) : Throwable(
+        when (kind) {
+            AddrKind.Ipv4 -> "invalid IPv4 address syntax"
+            AddrKind.Ipv6 -> "invalid IPv6 address syntax"
+        },
+    )
 
 // ---- Parser (adapted from Rust core library) ----
 
-private class Parser(val input: ByteArray) {
+private class Parser(
+    val input: ByteArray,
+) {
     private var state: ByteArray = input
 
     fun parseWithIpv4(inner: (Parser) -> Ipv4Addr?, kind: AddrKind): Result<Ipv4Addr> {
@@ -417,15 +504,16 @@ private class Parser(val input: ByteArray) {
             val hasLeadingZero = p.peekChar() == '0'.code
 
             while (true) {
-                val digit: Int? = p.readAtomically { pp ->
-                    val ch = pp.readChar()
-                    if (ch != null) {
-                        val d = charToDigit(ch, radix)
-                        if (d >= 0) d else null
-                    } else {
-                        null
+                val digit: Int? =
+                    p.readAtomically { pp ->
+                        val ch = pp.readChar()
+                        if (ch != null) {
+                            val d = charToDigit(ch, radix)
+                            if (d >= 0) d else null
+                        } else {
+                            null
+                        }
                     }
-                }
                 if (digit == null) break
 
                 result = result * radix + digit
@@ -446,9 +534,10 @@ private class Parser(val input: ByteArray) {
         readAtomically { p ->
             val groups = IntArray(4)
             for (i in 0..3) {
-                val num: Int? = p.readSeparator('.'.code, i) { pp ->
-                    pp.readNumber(10, 3, false)
-                }
+                val num: Int? =
+                    p.readSeparator('.'.code, i) { pp ->
+                        pp.readNumber(10, 3, false)
+                    }
                 if (num == null || num > 255) return@readAtomically null
                 groups[i] = num
             }
@@ -550,12 +639,13 @@ private class Parser(val input: ByteArray) {
 
     companion object {
         private fun charToDigit(ch: Int, radix: Int): Int {
-            val digit = when (ch) {
-                in '0'.code..'9'.code -> ch - '0'.code
-                in 'a'.code..'f'.code -> ch - 'a'.code + 10
-                in 'A'.code..'F'.code -> ch - 'A'.code + 10
-                else -> return -1
-            }
+            val digit =
+                when (ch) {
+                    in '0'.code..'9'.code -> ch - '0'.code
+                    in 'a'.code..'f'.code -> ch - 'a'.code + 10
+                    in 'A'.code..'F'.code -> ch - 'A'.code + 10
+                    else -> return -1
+                }
             return if (digit < radix) digit else -1
         }
     }

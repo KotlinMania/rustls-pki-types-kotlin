@@ -145,20 +145,29 @@ private fun decode(
         }
 
         // Everything else is illegal.
-        else -> return Base64DecodeResult.Err(Error.InvalidTrailingPadding)
+        else -> {
+            return Base64DecodeResult.Err(Error.InvalidTrailingPadding)
+        }
     }
 
     return Base64DecodeResult.Ok(outputOffset)
 }
 
 internal sealed class Base64DecodeResult {
-    data class Ok(val bytesWritten: Int) : Base64DecodeResult()
-    data class Err(val error: Error) : Base64DecodeResult()
+    data class Ok(
+        val bytesWritten: Int,
+    ) : Base64DecodeResult()
+
+    data class Err(
+        val error: Error,
+    ) : Base64DecodeResult()
 }
 
 internal sealed class Error {
     /** Given character is not valid in the base64 alphabet. */
-    data class InvalidCharacter(val byte: Int) : Error()
+    data class InvalidCharacter(
+        val byte: Int,
+    ) : Error()
 
     /** A padding character appeared outside the final block of 4 characters. */
     data object PrematurePadding : Error()
@@ -174,7 +183,9 @@ internal sealed class Error {
     data object InsufficientOutputSpace : Error()
 }
 
-internal data class CodePoint(val value: Int) {
+internal data class CodePoint(
+    val value: Int,
+) {
     companion object {
         val WHITESPACE: CodePoint = CodePoint(0xf0)
         val PAD: CodePoint = CodePoint(0xf1)

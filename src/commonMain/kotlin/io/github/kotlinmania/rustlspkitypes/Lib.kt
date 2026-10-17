@@ -33,13 +33,19 @@ class Der(
  */
 sealed class PrivateKeyDer {
     /** An RSA private key */
-    data class Pkcs1(val key: PrivatePkcs1KeyDer) : PrivateKeyDer()
+    data class Pkcs1(
+        val key: PrivatePkcs1KeyDer,
+    ) : PrivateKeyDer()
 
     /** A Sec1 private key */
-    data class Sec1(val key: PrivateSec1KeyDer) : PrivateKeyDer()
+    data class Sec1(
+        val key: PrivateSec1KeyDer,
+    ) : PrivateKeyDer()
 
     /** A PKCS#8 private key */
-    data class Pkcs8(val key: PrivatePkcs8KeyDer) : PrivateKeyDer()
+    data class Pkcs8(
+        val key: PrivatePkcs8KeyDer,
+    ) : PrivateKeyDer()
 
     /**
      * Clone the private key to an owned value.
@@ -82,13 +88,14 @@ sealed class PrivateKeyDer {
             }
 
             // The length of the SEQUENCE is encoded in the second byte. We must skip this many bytes.
-            val skipLen: Int = if ((key[1].toInt() and 0xff) < SHORT_FORM_LEN_MAX) {
-                // 1 byte for SEQUENCE tag, 1 byte for short-form len
-                2
-            } else {
-                // 1 byte for SEQUENCE tag, 1 byte for start of len, remaining bytes encoded in key[1].
-                2 + ((key[1].toInt() and 0xff) - SHORT_FORM_LEN_MAX)
-            }
+            val skipLen: Int =
+                if ((key[1].toInt() and 0xff) < SHORT_FORM_LEN_MAX) {
+                    // 1 byte for SEQUENCE tag, 1 byte for short-form len
+                    2
+                } else {
+                    // 1 byte for SEQUENCE tag, 1 byte for start of len, remaining bytes encoded in key[1].
+                    2 + ((key[1].toInt() and 0xff) - SHORT_FORM_LEN_MAX)
+                }
 
             if (skipLen >= key.size) {
                 return Result.failure(IllegalArgumentException(INVALID_KEY_DER_ERR))
@@ -134,7 +141,9 @@ sealed class PrivateKeyDer {
  * RSA private keys are identified in PEM context as `RSA PRIVATE KEY` and when stored in a
  * file usually use a `.pem` or `.key` extension.
  */
-class PrivatePkcs1KeyDer private constructor(val der: Der) {
+class PrivatePkcs1KeyDer private constructor(
+    val der: Der,
+) {
     /**
      * Clone the private key to an owned value.
      */
@@ -164,7 +173,9 @@ class PrivatePkcs1KeyDer private constructor(val der: Der) {
  * Sec1 private keys are identified in PEM context as `EC PRIVATE KEY` and when stored in a
  * file usually use a `.pem` or `.key` extension.
  */
-class PrivateSec1KeyDer private constructor(val der: Der) {
+class PrivateSec1KeyDer private constructor(
+    val der: Der,
+) {
     /**
      * Clone the private key to an owned value.
      */
@@ -194,7 +205,9 @@ class PrivateSec1KeyDer private constructor(val der: Der) {
  * PKCS#8 private keys are identified in PEM context as `PRIVATE KEY` and when stored in a
  * file usually use a `.pem` or `.key` extension.
  */
-class PrivatePkcs8KeyDer private constructor(val der: Der) {
+class PrivatePkcs8KeyDer private constructor(
+    val der: Der,
+) {
     /**
      * Clone the private key to an owned value.
      */
@@ -237,11 +250,12 @@ data class TrustAnchor(
     /**
      * Yield an owned copy of this [TrustAnchor].
      */
-    fun toOwned(): TrustAnchor = TrustAnchor(
-        subject = Der(subject.asRef().copyOf()),
-        subjectPublicKeyInfo = Der(subjectPublicKeyInfo.asRef().copyOf()),
-        nameConstraints = nameConstraints?.let { Der(it.asRef().copyOf()) },
-    )
+    fun toOwned(): TrustAnchor =
+        TrustAnchor(
+            subject = Der(subject.asRef().copyOf()),
+            subjectPublicKeyInfo = Der(subjectPublicKeyInfo.asRef().copyOf()),
+            nameConstraints = nameConstraints?.let { Der(it.asRef().copyOf()) },
+        )
 }
 
 /**
@@ -250,7 +264,9 @@ data class TrustAnchor(
  * Certificate revocation lists are identified in PEM context as `X509 CRL` and when stored in a
  * file usually use a `.crl` extension.
  */
-class CertificateRevocationListDer(val der: Der) {
+class CertificateRevocationListDer(
+    val der: Der,
+) {
     fun asRef(): ByteArray = der.asRef()
 
     override fun equals(other: Any?): Boolean = other is CertificateRevocationListDer && der == other.der
@@ -268,7 +284,9 @@ class CertificateRevocationListDer(val der: Der) {
  * Certificate signing requests are identified in PEM context as `CERTIFICATE REQUEST` and when stored in a
  * file usually use a `.csr` extension.
  */
-class CertificateSigningRequestDer(val der: Der) {
+class CertificateSigningRequestDer(
+    val der: Der,
+) {
     fun asRef(): ByteArray = der.asRef()
 
     override fun equals(other: Any?): Boolean = other is CertificateSigningRequestDer && der == other.der
@@ -286,7 +304,9 @@ class CertificateSigningRequestDer(val der: Der) {
  * Certificates are identified in PEM context as `CERTIFICATE` and when stored in a
  * file usually use a `.pem`, `.cer` or `.crt` extension.
  */
-class CertificateDer(val der: Der) {
+class CertificateDer(
+    val der: Der,
+) {
     fun asRef(): ByteArray = der.asRef()
 
     /**
@@ -318,7 +338,9 @@ typealias SubjectPublicKeyInfo = SubjectPublicKeyInfoDer
  *
  * Public keys are identified in PEM context as a `PUBLIC KEY`.
  */
-class SubjectPublicKeyInfoDer(val der: Der) {
+class SubjectPublicKeyInfoDer(
+    val der: Der,
+) {
     fun asRef(): ByteArray = der.asRef()
 
     /**
@@ -339,7 +361,9 @@ class SubjectPublicKeyInfoDer(val der: Der) {
  * A TLS-encoded Encrypted Client Hello (ECH) configuration list (`ECHConfigList`);
  * as specified in draft-ietf-tls-esni-18 section 4.
  */
-class EchConfigListBytes(val bytes: ByteArray) {
+class EchConfigListBytes(
+    val bytes: ByteArray,
+) {
     /**
      * Converts this config into its owned variant, copying borrowed content (if any).
      */
@@ -425,7 +449,9 @@ object InvalidSignature
  *
  * The Unix epoch is defined January 1, 1970 00:00:00 UTC.
  */
-data class UnixTime(val seconds: ULong) {
+data class UnixTime(
+    val seconds: ULong,
+) {
     /**
      * Convert a number of seconds since the start of 1970 to a [UnixTime].
      */
@@ -458,5 +484,7 @@ sealed class FipsStatus {
     data object Pending : FipsStatus()
 
     /** FIPS certified, with named certificate. */
-    data class Certified(val certificate: String) : FipsStatus()
+    data class Certified(
+        val certificate: String,
+    ) : FipsStatus()
 }
