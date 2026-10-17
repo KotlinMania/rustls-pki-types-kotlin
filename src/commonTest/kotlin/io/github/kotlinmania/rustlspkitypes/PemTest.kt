@@ -2,7 +2,6 @@
 package io.github.kotlinmania.rustlspkitypes
 
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -10,11 +9,12 @@ import kotlin.test.assertTrue
 class PemTest {
     @Test
     fun parseCertificatePem() {
-        val pem = """
+        val pem =
+            """
             -----BEGIN CERTIFICATE-----
             MIIB
             -----END CERTIFICATE-----
-        """.trimIndent().encodeToByteArray()
+            """.trimIndent().encodeToByteArray()
 
         val iter = SliceIter.new(pem) { kind, der -> Pair(kind, der) }
         assertTrue(iter.hasNext())
@@ -28,14 +28,15 @@ class PemTest {
 
     @Test
     fun parseMultipleSections() {
-        val pem = """
+        val pem =
+            """
             -----BEGIN CERTIFICATE-----
             MIIB
             -----END CERTIFICATE-----
             -----BEGIN PUBLIC KEY-----
             MIIB
             -----END PUBLIC KEY-----
-        """.trimIndent().encodeToByteArray()
+            """.trimIndent().encodeToByteArray()
 
         val iter = SliceIter.new(pem) { kind, der -> Pair(kind, der) }
         assertTrue(iter.hasNext())
@@ -51,15 +52,17 @@ class PemTest {
 
     @Test
     fun pemObjectFromPemSlice() {
-        val pem = """
+        val pem =
+            """
             -----BEGIN CERTIFICATE-----
             MIIB
             -----END CERTIFICATE-----
-        """.trimIndent().encodeToByteArray()
+            """.trimIndent().encodeToByteArray()
 
-        val certResult = PemObject.fromPemSlice(pem) { kind, der ->
-            if (kind == SectionKind.Certificate) CertificateDer.from(der) else null
-        }
+        val certResult =
+            PemObject.fromPemSlice(pem) { kind, der ->
+                if (kind == SectionKind.Certificate) CertificateDer.from(der) else null
+            }
         assertTrue(certResult.isSuccess)
         val cert = certResult.getOrThrow()
         assertEquals(3, cert.asRef().size)
@@ -67,10 +70,11 @@ class PemTest {
 
     @Test
     fun missingSectionEnd() {
-        val pem = """
+        val pem =
+            """
             -----BEGIN CERTIFICATE-----
             MIIB
-        """.trimIndent().encodeToByteArray()
+            """.trimIndent().encodeToByteArray()
 
         val iter = SliceIter.new(pem) { kind, der -> Pair(kind, der) }
         assertTrue(iter.hasNext())
@@ -82,11 +86,12 @@ class PemTest {
 
     @Test
     fun illegalSectionStart() {
-        val pem = """
+        val pem =
+            """
             -----BEGIN CERTIFICATE---
             MIIB
             -----END CERTIFICATE-----
-        """.trimIndent().encodeToByteArray()
+            """.trimIndent().encodeToByteArray()
 
         val iter = SliceIter.new(pem) { kind, der -> Pair(kind, der) }
         assertTrue(iter.hasNext())

@@ -12,11 +12,22 @@ package io.github.kotlinmania.rustlspkitypes
  *
  * <https://www.ietf.org/archive/id/draft-ietf-lamps-dilithium-certificates-07.html#name-identifiers>
  */
-val ML_DSA_44: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x09, 0x60, 0x86.toByte(), 0x48, 0x01, 0x65, 0x03, 0x04, 0x03, 0x11,
-    ),
-)
+val ML_DSA_44: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x09,
+            0x60,
+            0x86.toByte(),
+            0x48,
+            0x01,
+            0x65,
+            0x03,
+            0x04,
+            0x03,
+            0x11,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `id-ml-dsa-65`.
@@ -29,11 +40,22 @@ val ML_DSA_44: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  *
  * <https://www.ietf.org/archive/id/draft-ietf-lamps-dilithium-certificates-07.html#name-identifiers>
  */
-val ML_DSA_65: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x09, 0x60, 0x86.toByte(), 0x48, 0x01, 0x65, 0x03, 0x04, 0x03, 0x12,
-    ),
-)
+val ML_DSA_65: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x09,
+            0x60,
+            0x86.toByte(),
+            0x48,
+            0x01,
+            0x65,
+            0x03,
+            0x04,
+            0x03,
+            0x12,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `id-ml-dsa-87`.
@@ -46,11 +68,22 @@ val ML_DSA_65: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  *
  * <https://www.ietf.org/archive/id/draft-ietf-lamps-dilithium-certificates-07.html#name-identifiers>
  */
-val ML_DSA_87: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x09, 0x60, 0x86.toByte(), 0x48, 0x01, 0x65, 0x03, 0x04, 0x03, 0x13,
-    ),
-)
+val ML_DSA_87: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x09,
+            0x60,
+            0x86.toByte(),
+            0x48,
+            0x01,
+            0x65,
+            0x03,
+            0x04,
+            0x03,
+            0x13,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `id-ecPublicKey` with named curve `secp256k1`.
@@ -64,12 +97,27 @@ val ML_DSA_87: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * OBJECT_IDENTIFIER { 1.3.132.0.10 }
  * ```
  */
-val ECDSA_P256K1: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x07, 0x2a, 0x86.toByte(), 0x48.toByte(), 0xce.toByte(), 0x3d, 0x02, 0x01,
-        0x06, 0x05, 0x2b, 0x81.toByte(), 0x04, 0x00, 0x0a,
-    ),
-)
+val ECDSA_P256K1: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x07,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0xce.toByte(),
+            0x3d,
+            0x02,
+            0x01,
+            0x06,
+            0x05,
+            0x2b,
+            0x81.toByte(),
+            0x04,
+            0x00,
+            0x0a,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `id-ecPublicKey` with named curve `secp256r1`.
@@ -83,12 +131,30 @@ val ECDSA_P256K1: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * OBJECT_IDENTIFIER { 1.2.840.10045.3.1.7 }
  * ```
  */
-val ECDSA_P256: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x07, 0x2a, 0x86.toByte(), 0x48.toByte(), 0xce.toByte(), 0x3d, 0x02, 0x01,
-        0x06, 0x08, 0x2a, 0x86.toByte(), 0x48.toByte(), 0xce.toByte(), 0x3d, 0x03, 0x01, 0x07,
-    ),
-)
+val ECDSA_P256: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x07,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0xce.toByte(),
+            0x3d,
+            0x02,
+            0x01,
+            0x06,
+            0x08,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0xce.toByte(),
+            0x3d,
+            0x03,
+            0x01,
+            0x07,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `id-ecPublicKey` with named curve `secp384r1`.
@@ -102,12 +168,27 @@ val ECDSA_P256: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * OBJECT_IDENTIFIER { 1.3.132.0.34 }
  * ```
  */
-val ECDSA_P384: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x07, 0x2a, 0x86.toByte(), 0x48.toByte(), 0xce.toByte(), 0x3d, 0x02, 0x01,
-        0x06, 0x05, 0x2b, 0x81.toByte(), 0x04, 0x00, 0x22,
-    ),
-)
+val ECDSA_P384: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x07,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0xce.toByte(),
+            0x3d,
+            0x02,
+            0x01,
+            0x06,
+            0x05,
+            0x2b,
+            0x81.toByte(),
+            0x04,
+            0x00,
+            0x22,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `id-ecPublicKey` with named curve `secp521r1`.
@@ -121,12 +202,27 @@ val ECDSA_P384: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * OBJECT_IDENTIFIER { 1.3.132.0.35 }
  * ```
  */
-val ECDSA_P521: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x07, 0x2a, 0x86.toByte(), 0x48.toByte(), 0xce.toByte(), 0x3d, 0x02, 0x01,
-        0x06, 0x05, 0x2b, 0x81.toByte(), 0x04, 0x00, 0x23,
-    ),
-)
+val ECDSA_P521: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x07,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0xce.toByte(),
+            0x3d,
+            0x02,
+            0x01,
+            0x06,
+            0x05,
+            0x2b,
+            0x81.toByte(),
+            0x04,
+            0x00,
+            0x23,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `ecdsa-with-SHA256`.
@@ -138,11 +234,21 @@ val ECDSA_P521: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * OBJECT_IDENTIFIER { 1.2.840.10045.4.3.2 }
  * ```
  */
-val ECDSA_SHA256: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x08, 0x2a, 0x86.toByte(), 0x48.toByte(), 0xce.toByte(), 0x3d, 0x04, 0x03, 0x02,
-    ),
-)
+val ECDSA_SHA256: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x08,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0xce.toByte(),
+            0x3d,
+            0x04,
+            0x03,
+            0x02,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `ecdsa-with-SHA384`.
@@ -154,11 +260,21 @@ val ECDSA_SHA256: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * OBJECT_IDENTIFIER { 1.2.840.10045.4.3.3 }
  * ```
  */
-val ECDSA_SHA384: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x08, 0x2a, 0x86.toByte(), 0x48.toByte(), 0xce.toByte(), 0x3d, 0x04, 0x03, 0x03,
-    ),
-)
+val ECDSA_SHA384: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x08,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0xce.toByte(),
+            0x3d,
+            0x04,
+            0x03,
+            0x03,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `ecdsa-with-SHA512`.
@@ -170,11 +286,21 @@ val ECDSA_SHA384: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * OBJECT_IDENTIFIER { 1.2.840.10045.4.3.4 }
  * ```
  */
-val ECDSA_SHA512: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x08, 0x2a, 0x86.toByte(), 0x48.toByte(), 0xce.toByte(), 0x3d, 0x04, 0x03, 0x04,
-    ),
-)
+val ECDSA_SHA512: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x08,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0xce.toByte(),
+            0x3d,
+            0x04,
+            0x03,
+            0x04,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `rsaEncryption`.
@@ -187,12 +313,24 @@ val ECDSA_SHA512: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * NULL {}
  * ```
  */
-val RSA_ENCRYPTION: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x09, 0x2a, 0x86.toByte(), 0x48.toByte(), 0x86.toByte(), 0xf7.toByte(), 0x0d, 0x01, 0x01, 0x01,
-        0x05, 0x00,
-    ),
-)
+val RSA_ENCRYPTION: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x09,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x86.toByte(),
+            0xf7.toByte(),
+            0x0d,
+            0x01,
+            0x01,
+            0x01,
+            0x05,
+            0x00,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `sha256WithRSAEncryption`.
@@ -205,12 +343,24 @@ val RSA_ENCRYPTION: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * NULL {}
  * ```
  */
-val RSA_PKCS1_SHA256: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x09, 0x2a, 0x86.toByte(), 0x48.toByte(), 0x86.toByte(), 0xf7.toByte(), 0x0d, 0x01, 0x01, 0x0b,
-        0x05, 0x00,
-    ),
-)
+val RSA_PKCS1_SHA256: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x09,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x86.toByte(),
+            0xf7.toByte(),
+            0x0d,
+            0x01,
+            0x01,
+            0x0b,
+            0x05,
+            0x00,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `sha384WithRSAEncryption`.
@@ -223,12 +373,24 @@ val RSA_PKCS1_SHA256: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * NULL {}
  * ```
  */
-val RSA_PKCS1_SHA384: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x09, 0x2a, 0x86.toByte(), 0x48.toByte(), 0x86.toByte(), 0xf7.toByte(), 0x0d, 0x01, 0x01, 0x0c,
-        0x05, 0x00,
-    ),
-)
+val RSA_PKCS1_SHA384: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x09,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x86.toByte(),
+            0xf7.toByte(),
+            0x0d,
+            0x01,
+            0x01,
+            0x0c,
+            0x05,
+            0x00,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `sha512WithRSAEncryption`.
@@ -241,12 +403,24 @@ val RSA_PKCS1_SHA384: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * NULL {}
  * ```
  */
-val RSA_PKCS1_SHA512: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x09, 0x2a, 0x86.toByte(), 0x48.toByte(), 0x86.toByte(), 0xf7.toByte(), 0x0d, 0x01, 0x01, 0x0d,
-        0x05, 0x00,
-    ),
-)
+val RSA_PKCS1_SHA512: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x09,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x86.toByte(),
+            0xf7.toByte(),
+            0x0d,
+            0x01,
+            0x01,
+            0x0d,
+            0x05,
+            0x00,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `rsassaPss` with:
@@ -258,16 +432,76 @@ val RSA_PKCS1_SHA512: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * See <https://datatracker.ietf.org/doc/html/rfc4055#section-3.1> for
  * the meaning of the context-specific tags.
  */
-val RSA_PSS_SHA256: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x09, 0x2a, 0x86.toByte(), 0x48.toByte(), 0x86.toByte(), 0xf7.toByte(), 0x0d, 0x01, 0x01, 0x0a,
-        0x30, 0x34,
-        0xa0.toByte(), 0x0f, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86.toByte(), 0x48.toByte(), 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00,
-        0xa1.toByte(), 0x1c, 0x30, 0x1a, 0x06, 0x09, 0x2a, 0x86.toByte(), 0x48.toByte(), 0x86.toByte(), 0xf7.toByte(), 0x0d, 0x01, 0x01, 0x08,
-        0x30, 0x0d, 0x06, 0x09, 0x60, 0x86.toByte(), 0x48.toByte(), 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00,
-        0xa2.toByte(), 0x03, 0x02, 0x01, 0x20,
-    ),
-)
+val RSA_PSS_SHA256: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x09,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x86.toByte(),
+            0xf7.toByte(),
+            0x0d,
+            0x01,
+            0x01,
+            0x0a,
+            0x30,
+            0x34,
+            0xa0.toByte(),
+            0x0f,
+            0x30,
+            0x0d,
+            0x06,
+            0x09,
+            0x60,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x01,
+            0x65,
+            0x03,
+            0x04,
+            0x02,
+            0x01,
+            0x05,
+            0x00,
+            0xa1.toByte(),
+            0x1c,
+            0x30,
+            0x1a,
+            0x06,
+            0x09,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x86.toByte(),
+            0xf7.toByte(),
+            0x0d,
+            0x01,
+            0x01,
+            0x08,
+            0x30,
+            0x0d,
+            0x06,
+            0x09,
+            0x60,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x01,
+            0x65,
+            0x03,
+            0x04,
+            0x02,
+            0x01,
+            0x05,
+            0x00,
+            0xa2.toByte(),
+            0x03,
+            0x02,
+            0x01,
+            0x20,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `rsassaPss` with:
@@ -279,16 +513,76 @@ val RSA_PSS_SHA256: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * See <https://datatracker.ietf.org/doc/html/rfc4055#section-3.1> for
  * the meaning of the context-specific tags.
  */
-val RSA_PSS_SHA384: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x09, 0x2a, 0x86.toByte(), 0x48.toByte(), 0x86.toByte(), 0xf7.toByte(), 0x0d, 0x01, 0x01, 0x0a,
-        0x30, 0x34,
-        0xa0.toByte(), 0x0f, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86.toByte(), 0x48.toByte(), 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05, 0x00,
-        0xa1.toByte(), 0x1c, 0x30, 0x1a, 0x06, 0x09, 0x2a, 0x86.toByte(), 0x48.toByte(), 0x86.toByte(), 0xf7.toByte(), 0x0d, 0x01, 0x01, 0x08,
-        0x30, 0x0d, 0x06, 0x09, 0x60, 0x86.toByte(), 0x48.toByte(), 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05, 0x00,
-        0xa2.toByte(), 0x03, 0x02, 0x01, 0x30,
-    ),
-)
+val RSA_PSS_SHA384: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x09,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x86.toByte(),
+            0xf7.toByte(),
+            0x0d,
+            0x01,
+            0x01,
+            0x0a,
+            0x30,
+            0x34,
+            0xa0.toByte(),
+            0x0f,
+            0x30,
+            0x0d,
+            0x06,
+            0x09,
+            0x60,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x01,
+            0x65,
+            0x03,
+            0x04,
+            0x02,
+            0x02,
+            0x05,
+            0x00,
+            0xa1.toByte(),
+            0x1c,
+            0x30,
+            0x1a,
+            0x06,
+            0x09,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x86.toByte(),
+            0xf7.toByte(),
+            0x0d,
+            0x01,
+            0x01,
+            0x08,
+            0x30,
+            0x0d,
+            0x06,
+            0x09,
+            0x60,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x01,
+            0x65,
+            0x03,
+            0x04,
+            0x02,
+            0x02,
+            0x05,
+            0x00,
+            0xa2.toByte(),
+            0x03,
+            0x02,
+            0x01,
+            0x30,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `rsassaPss` with:
@@ -300,16 +594,76 @@ val RSA_PSS_SHA384: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * See <https://datatracker.ietf.org/doc/html/rfc4055#section-3.1> for
  * the meaning of the context-specific tags.
  */
-val RSA_PSS_SHA512: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(
-        0x06, 0x09, 0x2a, 0x86.toByte(), 0x48.toByte(), 0x86.toByte(), 0xf7.toByte(), 0x0d, 0x01, 0x01, 0x0a,
-        0x30, 0x34,
-        0xa0.toByte(), 0x0f, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86.toByte(), 0x48.toByte(), 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00,
-        0xa1.toByte(), 0x1c, 0x30, 0x1a, 0x06, 0x09, 0x2a, 0x86.toByte(), 0x48.toByte(), 0x86.toByte(), 0xf7.toByte(), 0x0d, 0x01, 0x01, 0x08,
-        0x30, 0x0d, 0x06, 0x09, 0x60, 0x86.toByte(), 0x48.toByte(), 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00,
-        0xa2.toByte(), 0x03, 0x02, 0x01, 0x40,
-    ),
-)
+val RSA_PSS_SHA512: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(
+            0x06,
+            0x09,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x86.toByte(),
+            0xf7.toByte(),
+            0x0d,
+            0x01,
+            0x01,
+            0x0a,
+            0x30,
+            0x34,
+            0xa0.toByte(),
+            0x0f,
+            0x30,
+            0x0d,
+            0x06,
+            0x09,
+            0x60,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x01,
+            0x65,
+            0x03,
+            0x04,
+            0x02,
+            0x03,
+            0x05,
+            0x00,
+            0xa1.toByte(),
+            0x1c,
+            0x30,
+            0x1a,
+            0x06,
+            0x09,
+            0x2a,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x86.toByte(),
+            0xf7.toByte(),
+            0x0d,
+            0x01,
+            0x01,
+            0x08,
+            0x30,
+            0x0d,
+            0x06,
+            0x09,
+            0x60,
+            0x86.toByte(),
+            0x48.toByte(),
+            0x01,
+            0x65,
+            0x03,
+            0x04,
+            0x02,
+            0x03,
+            0x05,
+            0x00,
+            0xa2.toByte(),
+            0x03,
+            0x02,
+            0x01,
+            0x40,
+        ),
+    )
 
 /**
  * AlgorithmIdentifier for `ED25519`.
@@ -321,9 +675,10 @@ val RSA_PSS_SHA512: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * OBJECT_IDENTIFIER { 1.3.101.112 }
  * ```
  */
-val ED25519: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(0x06, 0x03, 0x2b, 0x65, 0x70),
-)
+val ED25519: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(0x06, 0x03, 0x2b, 0x65, 0x70),
+    )
 
 /**
  * AlgorithmIdentifier for `ED448`.
@@ -335,9 +690,10 @@ val ED25519: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  * OBJECT_IDENTIFIER { 1.3.101.113 }
  * ```
  */
-val ED448: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
-    byteArrayOf(0x06, 0x03, 0x2b, 0x65, 0x71),
-)
+val ED448: AlgorithmIdentifier =
+    AlgorithmIdentifier.fromSlice(
+        byteArrayOf(0x06, 0x03, 0x2b, 0x65, 0x71),
+    )
 
 /**
  * A DER encoding of the PKIX AlgorithmIdentifier type:
@@ -357,8 +713,9 @@ val ED448: AlgorithmIdentifier = AlgorithmIdentifier.fromSlice(
  *
  * Common values for this type are provided in this file.
  */
-class AlgorithmIdentifier private constructor(val bytes: ByteArray) {
-
+class AlgorithmIdentifier private constructor(
+    val bytes: ByteArray,
+) {
     /**
      * Makes a new [AlgorithmIdentifier] from a static octet slice.
      *
@@ -370,6 +727,10 @@ class AlgorithmIdentifier private constructor(val bytes: ByteArray) {
 
     fun asRef(): ByteArray = bytes
 
+    fun deref(): ByteArray = asRef()
+
+    fun fmt(): String = toString()
+
     override fun equals(other: Any?): Boolean =
         other is AlgorithmIdentifier && bytes.contentEquals(other.bytes)
 
@@ -377,3 +738,5 @@ class AlgorithmIdentifier private constructor(val bytes: ByteArray) {
 
     override fun toString(): String = hex(bytes)
 }
+
+typealias Target = ByteArray

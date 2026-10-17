@@ -1,9 +1,24 @@
-// port-lint: source lib.rs
 package io.github.kotlinmania.rustlspkitypes
 
-private val HEX_DIGITS = charArrayOf(
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
-)
+private val HEX_DIGITS =
+    charArrayOf(
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        'a',
+        'b',
+        'c',
+        'd',
+        'e',
+        'f',
+    )
 
 /**
  * Format a byte array as a lowercase hex string prefixed with `0x`.
