@@ -579,8 +579,6 @@ tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
     reports {
         html.required.set(true)
         sarif.required.set(true)
-        txt.required.set(false)
-        xml.required.set(false)
     }
 }
 
