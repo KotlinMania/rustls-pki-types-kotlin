@@ -57,49 +57,61 @@ enum class SectionKind(
 /**
  * Errors that may arise when parsing the contents of a PEM file.
  */
-sealed class PemError : Throwable() {
+sealed class PemError(
+    message: String? = null,
+) : Throwable(message) {
     /** A section is missing its "END marker" line. */
     data class MissingSectionEnd(
         val endMarker: ByteArray,
-    ) : PemError() {
+    ) : PemError("missing section end marker: ${endMarker.decodeToString()}") {
         override fun equals(other: Any?): Boolean = other is MissingSectionEnd && endMarker.contentEquals(other.endMarker)
 
         override fun hashCode(): Int = endMarker.contentHashCode()
 
         override fun toString(): String = "missing section end marker: ${endMarker.decodeToString()}"
-
-        override val message: String get() = toString()
     }
 
     /** Syntax error found in the line that starts a new section. */
     data class IllegalSectionStart(
         val line: ByteArray,
-    ) : PemError() {
+    ) : PemError("illegal section start: ${line.decodeToString()}") {
         override fun equals(other: Any?): Boolean = other is IllegalSectionStart && line.contentEquals(other.line)
 
         override fun hashCode(): Int = line.contentHashCode()
 
         override fun toString(): String = "illegal section start: ${line.decodeToString()}"
-
-        override val message: String get() = toString()
     }
 
     /** Base64 decode error. */
     data class Base64Decode(
         val base64Message: String,
-    ) : PemError() {
+    ) : PemError("base64 decode error: $base64Message") {
         override fun toString(): String = "base64 decode error: $base64Message"
+    }
 
-        override val message: String get() = toString()
+    /** I/O errors, from APIs that accept streaming readers. */
+    data class Io(
+        val ioMessage: String,
+    ) : PemError("I/O error: $ioMessage") {
+        override fun toString(): String = "I/O error: $ioMessage"
     }
 
     /** No items found of desired type. */
-    object NoItemsFound : PemError() {
+    data object NoItemsFound : PemError("no items found") {
         override fun toString(): String = "no items found"
-
-        override val message: String get() = toString()
     }
+
+    fun fmt(): String = message ?: toString()
 }
+
+typealias Error = PemError
+typealias Item<T> = Result<T>
+
+/**
+ * Conversion from a PEM [SectionKind] and body data for tuple (SectionKind, ByteArray).
+ */
+fun fromPem(kind: SectionKind, der: ByteArray): Pair<SectionKind, ByteArray>? =
+    Pair(kind, der)
 
 /**
  * Filter trait for types that can be created from a specific PEM section.
@@ -134,6 +146,74 @@ interface PemObject {
 
         fun <T : Any> pemSliceIter(pem: ByteArray, fromPem: (SectionKind, ByteArray) -> T?): SliceIter<T> =
             SliceIter(pem, fromPem)
+
+        fun <T : Any> fromPemFile(fileName: String, fromPem: (SectionKind, ByteArray) -> T?): Result<T> =
+            Result.failure(PemError.Io("reading PEM files is not supported directly in common code"))
+
+        fun <T : Any> pemFileIter(fileName: String, fromPem: (SectionKind, ByteArray) -> T?): Result<ReadIter<BufRead, T>> =
+            Result.failure(PemError.Io("reading PEM files is not supported directly in common code"))
+
+        fun <R : BufRead, T : Any> fromPemReader(rd: R, fromPem: (SectionKind, ByteArray) -> T?): Result<T> {
+            val iter = ReadIter(rd, fromPem)
+            return if (iter.hasNext()) {
+                iter.next()
+            } else {
+                Result.failure(PemError.NoItemsFound)
+            }
+        }
+
+        fun <R : BufRead, T : Any> pemReaderIter(rd: R, fromPem: (SectionKind, ByteArray) -> T?): ReadIter<R, T> =
+            ReadIter(rd, fromPem)
+    }
+}
+
+/**
+ * Trait for buffered reading of bytes.
+ */
+interface BufRead {
+    fun fillBuf(): ByteArray
+
+    fun consume(amount: Int)
+}
+
+/**
+ * Extract and return all PEM sections by reading [rd].
+ */
+class ReadIter<R : BufRead, T : Any>(
+    private val rd: R,
+    private val fromPem: (SectionKind, ByteArray) -> T?,
+) : Iterator<Result<T>> {
+    private val line = mutableListOf<Byte>()
+    private val b64Buf = mutableListOf<Byte>()
+    private var done: Boolean = false
+
+    companion object {
+        fun <R : BufRead, T : Any> new(rd: R, fromPem: (SectionKind, ByteArray) -> T?): ReadIter<R, T> =
+            ReadIter(rd, fromPem)
+    }
+
+    override fun hasNext(): Boolean = !done
+
+    override fun next(): Result<T> {
+        if (done) throw NoSuchElementException()
+        while (true) {
+            b64Buf.clear()
+            val result = fromBufInner(rd, line, b64Buf)
+            if (result.isFailure) {
+                done = true
+                return Result.failure(result.exceptionOrNull()!!)
+            }
+            val pair = result.getOrThrow()
+            if (pair == null) {
+                done = true
+                throw NoSuchElementException()
+            }
+            val (sec, item) = pair
+            val converted = fromPem(sec, item)
+            if (converted != null) {
+                return Result.success(converted)
+            }
+        }
     }
 }
 
@@ -254,7 +334,7 @@ class SliceIter<T : Any>(
 
 typealias PemSliceIter = SliceIter<Pair<SectionKind, ByteArray>>
 
-private sealed class PemFlow {
+internal sealed class PemFlow {
     data class Continue(
         val section: SectionLabel?,
         val b64buf: ByteArray,
@@ -265,20 +345,28 @@ private sealed class PemFlow {
     ) : PemFlow()
 }
 
-private sealed class SectionLabel {
+internal sealed class SectionLabel {
     data class Known(
         val kind: SectionKind,
     ) : SectionLabel()
 
     data class Unknown(
         val ty: ByteArray,
-    ) : SectionLabel()
+    ) : SectionLabel() {
+        override fun equals(other: Any?): Boolean = other is Unknown && ty.contentEquals(other.ty)
+
+        override fun hashCode(): Int = ty.contentHashCode()
+    }
 
     fun asSlice(): ByteArray =
         when (this) {
             is Known -> kind.asSlice()
             is Unknown -> ty
         }
+
+    fun asRef(): ByteArray = asSlice()
+
+    fun isEnd(line: ByteArray): Boolean = isEndCheck(line)
 
     companion object {
         fun from(value: ByteArray): SectionLabel {
@@ -300,7 +388,13 @@ private fun SectionLabel.isEndCheck(line: ByteArray): Boolean {
     return byteArrayStartsWith(afterTy, "-----".encodeToByteArray())
 }
 
-private fun pemRead(
+internal fun read(
+    nextLine: ByteArray?,
+    section: SectionLabel?,
+    b64buf: ByteArray,
+): Result<PemFlow> = pemRead(nextLine, section, b64buf)
+
+internal fun pemRead(
     nextLine: ByteArray?,
     section: SectionLabel?,
     b64buf: ByteArray,
@@ -344,7 +438,7 @@ private fun pemRead(
         return Result.success(PemFlow.Continue(SectionLabel.from(ty), b64buf))
     }
 
-    if (section != null && section.isEndCheck(line)) {
+    if (section != null && section.isEnd(line)) {
         val kind =
             when (section) {
                 is SectionLabel.Known -> {
@@ -381,4 +475,75 @@ private fun pemRead(
         }
 
     return Result.success(PemFlow.Continue(section, newB64))
+}
+
+/**
+ * Extract and decode the next supported PEM section from [rd].
+ */
+fun <R : BufRead> fromBuf(rd: R): Result<Pair<SectionKind, ByteArray>?> {
+    val b64Buf = mutableListOf<Byte>()
+    val line = mutableListOf<Byte>()
+    return fromBufInner(rd, line, b64Buf)
+}
+
+fun <R : BufRead> fromBufInner(
+    rd: R,
+    line: MutableList<Byte>,
+    b64Buf: MutableList<Byte>,
+): Result<Pair<SectionKind, ByteArray>?> {
+    var section: SectionLabel? = null
+    while (true) {
+        line.clear()
+        val len = readUntilNewline(rd, line)
+        val nextLine = if (len == 0) null else line.toByteArray()
+
+        val flowResult = pemRead(nextLine, section, b64Buf.toByteArray())
+        if (flowResult.isFailure) {
+            return Result.failure(flowResult.exceptionOrNull()!!)
+        }
+        when (val f = flowResult.getOrThrow()) {
+            is PemFlow.Break -> {
+                return Result.success(f.item)
+            }
+
+            is PemFlow.Continue -> {
+                section = f.section
+                b64Buf.clear()
+                for (b in f.b64buf) b64Buf.add(b)
+            }
+        }
+    }
+}
+
+fun <R : BufRead> readUntilNewline(r: R, buf: MutableList<Byte>): Int {
+    var totalRead = 0
+    while (true) {
+        val available = r.fillBuf()
+        if (available.isEmpty()) break
+        var foundIndex = -1
+        for (i in available.indices) {
+            val b = available[i]
+            if (b == '\n'.code.toByte() || b == '\r'.code.toByte()) {
+                foundIndex = i
+                break
+            }
+        }
+        if (foundIndex >= 0) {
+            for (i in 0..foundIndex) {
+                buf.add(available[i])
+            }
+            val used = foundIndex + 1
+            r.consume(used)
+            totalRead += used
+            break
+        } else {
+            for (b in available) {
+                buf.add(b)
+            }
+            val used = available.size
+            r.consume(used)
+            totalRead += used
+        }
+    }
+    return totalRead
 }

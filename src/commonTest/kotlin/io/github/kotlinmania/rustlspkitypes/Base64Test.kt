@@ -83,30 +83,30 @@ class Base64Test {
         val buffer = ByteArray(6)
 
         // Illegal trailing padding.
-        assertEquals(Base64DecodeResult.Err(Error.InvalidTrailingPadding), decodeBoth("A===", buffer))
-        assertEquals(Base64DecodeResult.Err(Error.InvalidTrailingPadding), decodeBoth("====", buffer))
-        assertEquals(Base64DecodeResult.Err(Error.InvalidTrailingPadding), decodeBoth("A==", buffer))
-        assertEquals(Base64DecodeResult.Err(Error.InvalidTrailingPadding), decodeBoth("AA=", buffer))
-        assertEquals(Base64DecodeResult.Err(Error.InvalidTrailingPadding), decodeBoth("A", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InvalidTrailingPadding), decodeBoth("A===", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InvalidTrailingPadding), decodeBoth("====", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InvalidTrailingPadding), decodeBoth("A==", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InvalidTrailingPadding), decodeBoth("AA=", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InvalidTrailingPadding), decodeBoth("A", buffer))
 
         // Padding before final block.
-        assertEquals(Base64DecodeResult.Err(Error.PrematurePadding), decodeBoth("=AAAAA==", buffer))
-        assertEquals(Base64DecodeResult.Err(Error.PrematurePadding), decodeBoth("A=AAAA==", buffer))
-        assertEquals(Base64DecodeResult.Err(Error.PrematurePadding), decodeBoth("AA=AAA==", buffer))
-        assertEquals(Base64DecodeResult.Err(Error.PrematurePadding), decodeBoth("AAA=AA==", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.PrematurePadding), decodeBoth("=AAAAA==", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.PrematurePadding), decodeBoth("A=AAAA==", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.PrematurePadding), decodeBoth("AA=AAA==", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.PrematurePadding), decodeBoth("AAA=AA==", buffer))
 
         // Illegal inputs.
-        assertEquals(Base64DecodeResult.Err(Error.InvalidCharacter('%'.code)), decodeBoth("%AAA", buffer))
-        assertEquals(Base64DecodeResult.Err(Error.InvalidCharacter('%'.code)), decodeBoth("A%AA", buffer))
-        assertEquals(Base64DecodeResult.Err(Error.InvalidCharacter('%'.code)), decodeBoth("AA%A", buffer))
-        assertEquals(Base64DecodeResult.Err(Error.InvalidCharacter('%'.code)), decodeBoth("AAA%", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InvalidCharacter('%'.code)), decodeBoth("%AAA", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InvalidCharacter('%'.code)), decodeBoth("A%AA", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InvalidCharacter('%'.code)), decodeBoth("AA%A", buffer))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InvalidCharacter('%'.code)), decodeBoth("AAA%", buffer))
 
         // Output sizing.
         assertEquals(Base64DecodeResult.Ok(6), decodeBoth("am9lIGJw", ByteArray(7)))
         assertEquals(Base64DecodeResult.Ok(6), decodeBoth("am9lIGJw", ByteArray(6)))
-        assertEquals(Base64DecodeResult.Err(Error.InsufficientOutputSpace), decodeBoth("am9lIGJw", ByteArray(5)))
-        assertEquals(Base64DecodeResult.Err(Error.InsufficientOutputSpace), decodeBoth("am9lIGJw", ByteArray(4)))
-        assertEquals(Base64DecodeResult.Err(Error.InsufficientOutputSpace), decodeBoth("am9lIGJw", ByteArray(3)))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InsufficientOutputSpace), decodeBoth("am9lIGJw", ByteArray(5)))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InsufficientOutputSpace), decodeBoth("am9lIGJw", ByteArray(4)))
+        assertEquals(Base64DecodeResult.Err(Base64Error.InsufficientOutputSpace), decodeBoth("am9lIGJw", ByteArray(3)))
 
         // Output sizing is not pessimistic when padding is valid.
         assertEquals(Base64DecodeResult.Ok(2), decodeBoth("am9=", ByteArray(2)))
@@ -164,7 +164,12 @@ class Base64Test {
         }
     }
 
-    // Constant-time validation test requiring valgrind/crabgrind is not portable to Kotlin Multiplatform
+    @Test
+    fun codepointDecodeSecretDoesNotBranchOrIndexOnSecretInput() {
+        // Constant-time validation test requiring valgrind/crabgrind is not portable to Kotlin Multiplatform
+        val result = CodePoint.decodeSecret('a'.code)
+        assertEquals(CodePoint(26), result)
+    }
 
     private fun decode(input: String): ByteArray {
         val bytes = input.encodeToByteArray()

@@ -51,7 +51,7 @@ private fun decode(
             continue
         }
         if (codePoint == CodePoint.INVALID) {
-            return Base64DecodeResult.Err(Error.InvalidCharacter(byte))
+            return Base64DecodeResult.Err(Base64Error.InvalidCharacter(byte))
         }
         val item: Int
         val pad: Int
@@ -67,10 +67,10 @@ private fun decode(
         // keeps this loop as tight as possible.
         if (used == 8) {
             if (padMask != 0b0000_0000) {
-                return Base64DecodeResult.Err(Error.PrematurePadding)
+                return Base64DecodeResult.Err(Base64Error.PrematurePadding)
             }
             if (outputOffset + 6 > output.size) {
-                return Base64DecodeResult.Err(Error.InsufficientOutputSpace)
+                return Base64DecodeResult.Err(Base64Error.InsufficientOutputSpace)
             }
             output[outputOffset] = (buffer shr 40).toByte()
             output[outputOffset + 1] = (buffer shr 32).toByte()
@@ -95,10 +95,10 @@ private fun decode(
     // Reduce to the final block.
     if (used > 4) {
         if ((padMask and 0b0000_1111) != 0) {
-            return Base64DecodeResult.Err(Error.PrematurePadding)
+            return Base64DecodeResult.Err(Base64Error.PrematurePadding)
         }
         if (outputOffset + 3 > output.size) {
-            return Base64DecodeResult.Err(Error.InsufficientOutputSpace)
+            return Base64DecodeResult.Err(Base64Error.InsufficientOutputSpace)
         }
         output[outputOffset] = (buffer shr 40).toByte()
         output[outputOffset + 1] = (buffer shr 32).toByte()
@@ -117,7 +117,7 @@ private fun decode(
         // 4 trailing bytes, no padding.
         used == 4 && padMask == 0b0000 -> {
             if (outputOffset + 3 > output.size) {
-                return Base64DecodeResult.Err(Error.InsufficientOutputSpace)
+                return Base64DecodeResult.Err(Base64Error.InsufficientOutputSpace)
             }
             output[outputOffset] = (buffer shr 40).toByte()
             output[outputOffset + 1] = (buffer shr 32).toByte()
@@ -128,7 +128,7 @@ private fun decode(
         // 4 trailing bytes with one padding character, or 3 trailing bytes.
         (used == 4 && padMask == 0b1000) || (used == 3 && padMask == 0b0000) -> {
             if (outputOffset + 2 > output.size) {
-                return Base64DecodeResult.Err(Error.InsufficientOutputSpace)
+                return Base64DecodeResult.Err(Base64Error.InsufficientOutputSpace)
             }
             output[outputOffset] = (buffer shr 40).toByte()
             output[outputOffset + 1] = (buffer shr 32).toByte()
@@ -138,7 +138,7 @@ private fun decode(
         // 4 trailing bytes with two padding characters, or 2 trailing bytes.
         (used == 4 && padMask == 0b1100) || (used == 2 && padMask == 0b0000) -> {
             if (outputOffset + 1 > output.size) {
-                return Base64DecodeResult.Err(Error.InsufficientOutputSpace)
+                return Base64DecodeResult.Err(Base64Error.InsufficientOutputSpace)
             }
             output[outputOffset] = (buffer shr 40).toByte()
             outputOffset += 1
@@ -146,7 +146,7 @@ private fun decode(
 
         // Everything else is illegal.
         else -> {
-            return Base64DecodeResult.Err(Error.InvalidTrailingPadding)
+            return Base64DecodeResult.Err(Base64Error.InvalidTrailingPadding)
         }
     }
 
@@ -159,28 +159,28 @@ internal sealed class Base64DecodeResult {
     ) : Base64DecodeResult()
 
     data class Err(
-        val error: Error,
+        val error: Base64Error,
     ) : Base64DecodeResult()
 }
 
-internal sealed class Error {
+internal sealed class Base64Error {
     /** Given character is not valid in the base64 alphabet. */
     data class InvalidCharacter(
         val byte: Int,
-    ) : Error()
+    ) : Base64Error()
 
     /** A padding character appeared outside the final block of 4 characters. */
-    data object PrematurePadding : Error()
+    data object PrematurePadding : Base64Error()
 
     /** The padding characters at the end of the input were invalid. */
-    data object InvalidTrailingPadding : Error()
+    data object InvalidTrailingPadding : Base64Error()
 
     /**
      * Not enough space in the output buffer.
      *
      * Use [decodedLength] to get an upper bound.
      */
-    data object InsufficientOutputSpace : Error()
+    data object InsufficientOutputSpace : Base64Error()
 }
 
 internal data class CodePoint(

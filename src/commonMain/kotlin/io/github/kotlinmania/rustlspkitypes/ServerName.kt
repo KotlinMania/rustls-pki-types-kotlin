@@ -28,6 +28,20 @@ sealed class ServerName {
             is IpAddressValue -> this
         }
 
+    fun borrow(): ServerName = this
+
+    fun ipv4Address(): Ipv4Addr? =
+        when (this) {
+            is IpAddressValue -> (ipAddress as? IpAddr.V4)?.addr
+            else -> null
+        }
+
+    fun ipv6Address(): Ipv6Addr? =
+        when (this) {
+            is IpAddressValue -> (ipAddress as? IpAddr.V6)?.addr
+            else -> null
+        }
+
     /**
      * Return the string representation of this [ServerName].
      */
@@ -36,6 +50,12 @@ sealed class ServerName {
             is DnsNameValue -> dnsName.asRef()
             is IpAddressValue -> ipAddress.toString()
         }
+
+    fun fmt(): String = toStr()
+
+    fun eq(other: Any?): Boolean = equals(other)
+
+    fun hash(): Int = hashCode()
 
     companion object {
         /**
@@ -64,35 +84,84 @@ sealed class ServerName {
 }
 
 /**
+ * Inner storage for [DnsName].
+ */
+sealed class DnsNameInner {
+    data class Borrowed(
+        val s: String,
+    ) : DnsNameInner()
+
+    data class Owned(
+        val s: String,
+    ) : DnsNameInner()
+
+    fun asStr(): String =
+        when (this) {
+            is Borrowed -> s
+            is Owned -> s
+        }
+
+    fun toOwned(): DnsNameInner =
+        when (this) {
+            is Borrowed -> Owned(s)
+            is Owned -> this
+        }
+
+    fun toLowercaseOwned(): DnsNameInner =
+        Owned(asStr().lowercase())
+
+    override fun equals(other: Any?): Boolean =
+        other is DnsNameInner && asStr().equals(other.asStr(), ignoreCase = true)
+
+    override fun hashCode(): Int = asStr().lowercase().hashCode()
+
+    override fun toString(): String = asStr()
+}
+
+/**
  * A type which encapsulates a string that is a syntactically valid DNS name.
  */
-class DnsName private constructor(
-    val value: String,
+class DnsName(
+    val inner: DnsNameInner,
 ) {
+    val value: String get() = inner.asStr()
+
+    constructor(value: String) : this(DnsNameInner.Owned(value))
+
     /**
      * Produce an owned [DnsName] from this [DnsName].
      */
-    fun toOwned(): DnsName = DnsName(value)
+    fun toOwned(): DnsName = DnsName(inner.toOwned())
 
     /**
      * Copy this object to produce an owned [DnsName], smashing the case to lowercase
      * in one operation.
      */
-    fun toLowercaseOwned(): DnsName = DnsName(value.lowercase())
+    fun toLowercaseOwned(): DnsName = DnsName(inner.toLowercaseOwned())
 
-    fun asRef(): String = value
+    fun asRef(): String = inner.asStr()
+
+    fun borrow(): DnsName = this
+
+    fun fmt(): String = toString()
+
+    fun eq(other: Any?): Boolean = equals(other)
+
+    fun hash(): Int = hashCode()
 
     override fun equals(other: Any?): Boolean =
-        other is DnsName && value.equals(other.value, ignoreCase = true)
+        other is DnsName && inner == other.inner
 
-    override fun hashCode(): Int = value.lowercase().hashCode()
+    override fun hashCode(): Int = inner.hashCode()
 
-    override fun toString(): String = "DnsName(\"$value\")"
+    override fun toString(): String = "DnsName(\"${inner.asStr()}\")"
 
     companion object {
+        fun new(s: String): Result<DnsName> = tryFromString(s)
+
         fun tryFromString(s: String): Result<DnsName> =
             if (validate(s.encodeToByteArray())) {
-                Result.success(DnsName(s))
+                Result.success(DnsName(DnsNameInner.Owned(s)))
             } else {
                 Result.failure(InvalidDnsNameError)
             }
@@ -102,7 +171,7 @@ class DnsName private constructor(
         fun tryFrom(value: ByteArray): Result<DnsName> {
             val s = value.decodeToString()
             return if (validate(value)) {
-                Result.success(DnsName(s))
+                Result.success(DnsName(DnsNameInner.Borrowed(s)))
             } else {
                 Result.failure(InvalidDnsNameError)
             }
@@ -110,6 +179,22 @@ class DnsName private constructor(
 
         fun tryFromStr(s: String): Result<DnsName> = tryFromString(s)
     }
+}
+
+/**
+ * State of DNS name label parsing.
+ */
+enum class State {
+    Fresh,
+    StartLabel,
+    InsideLabel,
+}
+
+/**
+ * Helper for reading IP address numeric components.
+ */
+interface ReadNumberHelper<T> {
+    fun parse(s: String): T?
 }
 
 /**
@@ -127,11 +212,6 @@ private enum class DnsValidationState {
     Subsequent,
     Hyphen,
 }
-
-private data class DnsValidationContext(
-    val state: DnsValidationState,
-    val len: Int,
-)
 
 private const val MAX_LABEL_LENGTH: Int = 63
 private const val MAX_NAME_LENGTH: Int = 253
@@ -332,7 +412,7 @@ data class Ipv4Addr(
             if (value.length > 15) {
                 return Result.failure(AddrParseError(AddrKind.Ipv4))
             }
-            return Parser(value.encodeToByteArray()).parseWithIpv4({ p -> p.readIpv4Addr() }, AddrKind.Ipv4)
+            return Parser(value.encodeToByteArray()).parseWith({ p -> p.readIpv4Addr() }, AddrKind.Ipv4)
         }
     }
 
@@ -367,7 +447,7 @@ data class Ipv6Addr(
         }
 
         fun tryFrom(value: String): Result<Ipv6Addr> =
-            Parser(value.encodeToByteArray()).parseWithIpv6({ p -> p.readIpv6Addr() }, AddrKind.Ipv6)
+            Parser(value.encodeToByteArray()).parseWith({ p -> p.readIpv6Addr() }, AddrKind.Ipv6)
     }
 
     override fun equals(other: Any?): Boolean = other is Ipv6Addr && octets.contentEquals(other.octets)
@@ -447,16 +527,7 @@ private class Parser(
 ) {
     private var state: ByteArray = input
 
-    fun parseWithIpv4(inner: (Parser) -> Ipv4Addr?, kind: AddrKind): Result<Ipv4Addr> {
-        val result = inner(this)
-        return if (result != null && state.isEmpty()) {
-            Result.success(result)
-        } else {
-            Result.failure(AddrParseError(kind))
-        }
-    }
-
-    fun parseWithIpv6(inner: (Parser) -> Ipv6Addr?, kind: AddrKind): Result<Ipv6Addr> {
+    fun <T> parseWith(inner: (Parser) -> T?, kind: AddrKind): Result<T> {
         val result = inner(this)
         return if (result != null && state.isEmpty()) {
             Result.success(result)
@@ -650,3 +721,13 @@ private class Parser(
         }
     }
 }
+
+internal fun ipv4Address(
+    ipAddress: String,
+    octets: ByteArray,
+): Pair<String, Result<Ipv4Addr>> = Pair(ipAddress, Result.success(Ipv4Addr(octets)))
+
+internal fun ipv6Address(
+    ipAddress: String,
+    octets: ByteArray,
+): Pair<String, Result<Ipv6Addr>> = Pair(ipAddress, Result.success(Ipv6Addr(octets)))

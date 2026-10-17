@@ -2,7 +2,6 @@
 package io.github.kotlinmania.rustlspkitypes
 
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

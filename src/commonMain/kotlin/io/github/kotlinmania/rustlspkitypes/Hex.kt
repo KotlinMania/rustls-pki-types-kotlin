@@ -1,4 +1,3 @@
-// port-lint: source lib.rs
 package io.github.kotlinmania.rustlspkitypes
 
 private val HEX_DIGITS =

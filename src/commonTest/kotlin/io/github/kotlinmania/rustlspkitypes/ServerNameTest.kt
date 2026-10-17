@@ -3,7 +3,6 @@ package io.github.kotlinmania.rustlspkitypes
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -358,7 +357,7 @@ class ServerNameTest {
     }
 
     @Test
-    fun serverNameToStr() {
+    fun toStr() {
         val dnsName = ServerName.tryFrom("example.com").getOrThrow()
         assertEquals("example.com", dnsName.toStr())
 

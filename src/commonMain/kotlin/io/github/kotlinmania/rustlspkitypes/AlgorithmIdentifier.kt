@@ -727,6 +727,10 @@ class AlgorithmIdentifier private constructor(
 
     fun asRef(): ByteArray = bytes
 
+    fun deref(): ByteArray = asRef()
+
+    fun fmt(): String = toString()
+
     override fun equals(other: Any?): Boolean =
         other is AlgorithmIdentifier && bytes.contentEquals(other.bytes)
 
@@ -734,3 +738,5 @@ class AlgorithmIdentifier private constructor(
 
     override fun toString(): String = hex(bytes)
 }
+
+typealias Target = ByteArray
