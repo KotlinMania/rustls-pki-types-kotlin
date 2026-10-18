@@ -20,8 +20,6 @@ let package = Package(
                 .unsafeFlags([
                     "-L", "../build/swift-test",
                     "-lRustlsPkiTypes",
-                    "-Xlinker", "-rpath",
-                    "-Xlinker", "-rpath",
                 ]),
             ]
         ),
