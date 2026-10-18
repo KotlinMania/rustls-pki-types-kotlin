@@ -80,7 +80,7 @@ or an [`Arc`].
 
 ```kotlin
 dependencies {
-    implementation("io.github.kotlinmania:rustls-pki-types-kotlin:0.1.0")
+    implementation("io.github.kotlinmania:rustls-pki-types-kotlin:0.2.0")
 }
 ```
 

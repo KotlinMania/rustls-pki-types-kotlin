@@ -104,7 +104,6 @@ sealed class PemError(
     fun fmt(): String = message ?: toString()
 }
 
-typealias Error = PemError
 typealias Item<T> = Result<T>
 
 /**
